@@ -7,7 +7,7 @@ function make2DArray(cols, rows){
 }
 
 var grid, cols, rows, w = 40;
-var totalBombs = 10;
+var totalBombs = 20;
 var bombIcon;
 var game_over = false;
 var game_win = false;
