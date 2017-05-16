@@ -1,5 +1,6 @@
 function Cell(i, j, w){
   this.bomb = false;
+  this.flagged = false;
   this.revealed = false;
   this.i = i;
   this.j = j;
@@ -7,7 +8,6 @@ function Cell(i, j, w){
   this.y = j * w;
   this.w = w;
   this.neighborBombs = 0;
-  this.icon = undefined;
 }
 
 Cell.prototype.show = function(){
@@ -19,7 +19,7 @@ Cell.prototype.show = function(){
     if (this.bomb){
       //fill(127);
       //ellipse(this.x + this.w / 2, this.y + this.w / 2, this.w * 0.5)
-      image(this.icon, this.x, this.y, this.w, this.w);
+      image(bombIcon, this.x, this.y, this.w, this.w);
     } else {
       fill(200);
       rect(this.x, this.y, this.w, this.w);
@@ -29,6 +29,8 @@ Cell.prototype.show = function(){
         text(this.neighborBombs, this.x + this.w / 2, this.y + this.w / 2 + 5);
       }
     }
+  } else if (this.flagged) {
+    image(flagIcon, this.x, this.y, this.w, this.w);
   }
 }
 

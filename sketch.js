@@ -7,20 +7,45 @@ function make2DArray(cols, rows){
 }
 
 var grid, cols, rows, w = 40;
-var totalBombs = 20;
+var totalBombs;
 var bombIcon;
+var flagIcon;
 var game_over = false;
 var game_win = false;
 
+var mousePressedCounter = 0;
+var mousePressedCounterBoolean = false;
+
 function preload(){
-  bombIcon = loadImage('bomb.png');
+  bombIcon = loadImage('assets/bomb.png');
+  flagIcon = loadImage('assets/flag.png');
 }
 
 function setup() {
-  createCanvas(401, 401);
+  var urlParams = window.location.search.substring(1);
+  var difficultyParam = urlParams.split('&')[0];
+  var difficulty = difficultyParam.split('=')[1];
 
-  cols = floor(width / w);
-  rows = floor(height / w);
+  var rdBtn = null;
+  if (difficulty == 'hard'){
+    rdBtn = select('#hardRdBtn');
+    cols = 15;
+    rows = 15;
+    totalBombs = 20;
+  } else if (difficulty == 'medium'){
+    rdBtn = select('#mediumRdBtn');
+    cols = 12;
+    rows = 12;
+    totalBombs = 15;
+  } else {
+    rdBtn = select('#easyRdBtn');
+    cols = 10;
+    rows = 10;
+    totalBombs = 10;
+  }
+  rdBtn.elt.checked = 'checked';
+
+  createCanvas(cols * w + 1, rows * w + 1);
   grid = make2DArray(cols, rows);
 
   for (var i = 0; i < cols; i++){
@@ -39,7 +64,6 @@ function setup() {
     var index = floor(random(options.length));
     var choice = options[index];
     grid[choice[0]][choice[1]].bomb = true;
-    grid[choice[0]][choice[1]].icon = bombIcon;
     options.splice(index, 1);
   }
 
@@ -51,18 +75,41 @@ function setup() {
 }
 
 function mousePressed(){
-  for (var i = 0; i < cols; i++){
-    for (var j = 0; j < cols; j++){
-      if (grid[i][j].contains(mouseX, mouseY)){
-        grid[i][j].reveal();
-        if (grid[i][j].bomb){
-          gameOver();
-        } else {
+  mousePressedCounterBoolean = true;
+}
+
+function mouseReleased(){
+  mousePressedCounterBoolean = false;
+  if (mousePressedCounter / frameRate() > 0.5){
+    for (var i = 0; i < cols; i++){
+      for (var j = 0; j < cols; j++){
+        if (grid[i][j].contains(mouseX, mouseY)){
+          if (!grid[i][j].flagged){
+            grid[i][j].flagged = true;
+            checkGameWin();
+          } else {
+            grid[i][j].flagged = false;
+            checkGameWin();
+          }
+        }
+      }
+    }
+  } else {
+    for (var i = 0; i < cols; i++){
+      for (var j = 0; j < cols; j++){
+        if (grid[i][j].contains(mouseX, mouseY)){
+          if (!grid[i][j].flagged){
+            grid[i][j].reveal();
+            if (grid[i][j].bomb){
+              gameOver();
+            }
+          }
           checkGameWin();
         }
       }
     }
   }
+  mousePressedCounter = 0;
 }
 
 function gameOver(){
@@ -80,15 +127,18 @@ function gameOver(){
 }
 
 function checkGameWin(){
+  var flaggedCells = 0;
   var revealedCells = 0;
   for (var i = 0; i < cols; i++){
     for (var j = 0; j < cols; j++){
-      if (grid[i][j].revealed){
+      if (grid[i][j].flagged){
+        flaggedCells++;
+      } else if (grid[i][j].revealed){
         revealedCells++;
       }
     }
   }
-  if (revealedCells + totalBombs == rows * cols){
+  if (flaggedCells + revealedCells == rows * cols && flaggedCells == totalBombs){
     game_win = true;
     createElement('br');
     createElement('br');
@@ -100,6 +150,9 @@ function checkGameWin(){
 
 function draw() {
   background(255);
+  if (mousePressedCounterBoolean){
+    mousePressedCounter++;
+  }
   for (var i = 0; i < cols; i++){
     for (var j = 0; j < cols; j++){
       grid[i][j].show();
