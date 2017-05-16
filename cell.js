@@ -40,6 +40,7 @@ Cell.prototype.contains = function(x, y){
 
 Cell.prototype.reveal = function(){
   this.revealed = true;
+  this.isFlagged = false;
   if (this.neighborBombs == 0){
     for (var xoff = -1; xoff <= 1; xoff++){
       for (var yoff = -1; yoff <=1 ; yoff++){
